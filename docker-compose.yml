@@ -1,0 +1,38 @@
+# docker-compose.yml
+# Author: Rushy Panchal
+# Date: March 8th, 2017
+# Description: Defines services required for Docker with Django.
+
+version: '2.1'
+services:
+  # Database (Postgres)
+  db:
+    extends:
+      file: docker/compose/default.yml
+      service: db
+
+  cache:
+    extends:
+      file: docker/compose/default.yml
+      service: cache
+
+  # Primary web server
+  web:
+    extends:
+      file: docker/compose/default.yml
+      service: web
+    volumes:
+      - .:${APP_DIR}
+      # prevents syncing back, see: http://jdlm.info/articles/2016/03/06/lessons-building-node-app-docker.html
+      - ${APP_DIR}/node_modules
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+      - PORT=8000
+    links:
+      - db
+      - cache
+    depends_on:
+      - db
+      - cache

@@ -1,0 +1,36 @@
+# docker/compose/default.yml
+# Author: Rushy Panchal
+# Date: April 4th, 2017
+# Description: Default Docker Compose configuration.
+
+version: '2.1'
+services:
+  # Database (Postgres)
+  db:
+    image: postgres:9.6.2
+
+  # Caching (memcached)
+  cache:
+    image: redis:3.0.7
+
+  web:
+    build:
+      context: ../..
+      args:
+        APP_DIR: ${APP_DIR}
+        PYTHON_VERSION: ${PYTHON_VERSION}
+        NODE_VERSION: ${NODE_VERSION}
+        ENV: ${ENV}
+        PORT: ${PORT}
+        STATIC_ROOT: ${STATIC_ROOT}
+        STATIC_URL: ${STATIC_URL}
+    command: /bin/bash docker/services/web.sh
+    environment:
+      - PORT=80
+      - ENV=production
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://cache:6379
+      - APP_DIR=${APP_DIR}
+    volumes: []
+
+    restart: always
